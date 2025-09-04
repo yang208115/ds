@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     """
     
     # 数据库配置
-    DATABASE_URL: str = "mysql+pymysql://NAP:Lyf652717@8.134.161.25:3306/nap"
+    DATABASE_URL: str = os.getenv("DATABASE_URL","mysql+pymysql://NAP:Lyf652717@8.134.161.25:3306/nap")
     
     # 安全配置
     SECRET_KEY: str = os.getenv("SECRET_KEY", "super-secret-key")
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     # GitHub OAuth配置
     GITHUB_CLIENT_ID: str = os.getenv("GITHUB_CLIENT_ID", "")
     GITHUB_CLIENT_SECRET: str = os.getenv("GITHUB_CLIENT_SECRET", "")
-    GITHUB_REDIRECT_URI: str = os.getenv("GITHUB_REDIRECT_URI", "http://localhost:8000/api/v1/auth/github/callback")
+    GITHUB_REDIRECT_URI: str = os.getenv("GITHUB_REDIRECT_URI", "https://api.dshell.top//api/v1/auth/github/callback")
     
     # 应用配置
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
@@ -43,11 +43,11 @@ class Settings(BaseSettings):
     PORT: int = int(os.getenv("PORT", 8000))
     
     # CORS配置
-    CORS_ORIGINS: List[str] = [
+    CORS_ORIGINS: List[str] = os.getenv('CORS_ORIGINS',[
         "http://localhost:5173",
         "http://localhost:3000",
-        "http://localhost:8000"
-    ]
+        "https://api.dshell.top/"
+    ])
     
     # 日志配置
     LOG_LEVEL: str = "INFO"

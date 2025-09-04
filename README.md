@@ -68,8 +68,8 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ### 5. 访问API文档
 
 启动后访问：
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- Swagger UI: https://api.dshell.top//docs
+- ReDoc: https://api.dshell.top//redoc
 
 ## API端点
 
