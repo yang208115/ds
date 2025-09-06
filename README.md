@@ -1,179 +1,130 @@
-# PersonaHub 后端API
+# DreamShell API
 
-基于FastAPI的AI人设管理后端服务
+人设市场管理系统后端API
 
-## 功能特性
+## 架构
 
-- 人设管理：创建、读取、更新、删除人设
-- 标签系统：为人设添加和管理标签
-- 作者管理：管理人设创作者信息
-- 搜索功能：根据名称、标签、作者搜索人设
-- 数据库迁移：使用Alembic进行数据库版本管理
+这是一个采用分层架构的 FastAPI 后端应用程序。
 
-## 项目结构
+- **`app/main.py`**: 应用程序的入口点，用于初始化和配置 FastAPI 应用。
+- **`app/api/`**: 包含 API 端点。端点在 `app/api/endpoints/` 中定义，并被主应用包含。
+- **`app/crud/`**: 处理数据库操作（创建、读取、更新、删除）。
+- **`app/schemas/`**: 定义用于数据验证和序列化的 Pydantic 模型。
+- **`app/db/`**: 包含数据库会话管理和 SQLAlchemy 的基础模型。
+- **`app/core/`**: 核心应用设置和配置。
+- **`tests/`**: 包含使用 `pytest` 编写的应用程序测试。
+- **`alembic/`**: 包含由 Alembic 管理的数据库迁移脚本。
 
-```
-nap/
-├── app/                    # 主应用目录
-│   ├── api/               # API路由
-│   │   ├── endpoints/      # 端点实现
-│   │   └── deps.py        # 依赖注入
-│   ├── core/              # 核心配置
-│   │   └── config.py      # 应用配置
-│   ├── crud/              # 数据库操作
-│   ├── db/                # 数据库相关
-│   │   ├── models/        # 数据模型
-│   │   └── session.py     # 数据库会话
-│   ├── schemas/           # Pydantic模式
-│   └── main.py            # 应用入口
-├── alembic/               # 数据库迁移
-├── tests/                 # 测试文件
-├── requirements.txt       # 依赖列表
-├── .env.example          # 环境变量示例
-└── test_api.py           # API测试脚本
-```
+## API Endpoints
 
-## 快速开始
+### Authentication (`/api/v1/auth`)
 
-### 1. 安装依赖
+- `POST /register`: 注册新用户
+- `POST /login`: 用户登录
+- `GET /github/login`: 重定向到 GitHub OAuth 登录
+- `GET /github/callback`: GitHub OAuth 回调
+- `GET /me`: 获取当前用户信息
+- `PUT /profile`: 更新当前用户信息
 
-```bash
-pip install -r requirements.txt
-```
+### Personas (`/api/personas`)
 
-### 2. 配置环境变量
+- `POST /`: 创建新的人设
+- `GET /`: 获取人设列表 (分页)
+- `GET /{person-id}`: 获取单个人设详情
+- `PUT /{person-id}`: 更新人设
+- `DELETE /{person-id}`: 删除人设
+- `POST /search`: 搜索人设
+- `GET /author/{author_uuid}`: 根据作者UUID获取人设列表
+- `POST /{person-id}/view`: 增加人设浏览量
+- `GET /tags/{tags}`: 根据标签获取人设列表
 
-复制`.env.example`为`.env`并修改配置：
+### Tags (`/api/tags`)
 
-```bash
-cp .env.example .env
-```
+- `GET /`: 获取所有标签
+- `GET /stats`: 获取标签统计信息
 
-编辑`.env`文件，设置数据库连接等参数。
+### Authors (`/api/authors`)
 
-### 3. 数据库迁移
+- `GET /`: 获取所有作者
+- `GET /stats`: 获取作者统计信息
+- `GET /avatar/{user_uuid}`: 获取用户头像
+- `GET /top`: 获取创作数量最多的作者列表
+- `GET /user/{user_uuid}`: 根据UUID获取用户信息
 
-```bash
-# 应用数据库迁移
-alembic upgrade head
-```
+## 安装
 
-### 4. 启动服务
+1.  克隆仓库:
 
-```bash
-# 开发模式启动
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+    ```bash
+    git clone https://github.com/your-username/your-repository.git
+    cd your-repository
+    ```
 
-### 5. 访问API文档
+2.  创建并激活虚拟环境:
 
-启动后访问：
-- Swagger UI: https://api.dshell.top//docs
-- ReDoc: https://api.dshell.top//redoc
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
 
-## API端点
+3.  安装依赖:
 
-### 人设管理
-- `GET /api/personas/` - 获取人设列表（分页）
-- `POST /api/personas/` - 创建新人设
-- `GET /api/personas/{id}` - 获取特定人设
-- `PUT /api/personas/{id}` - 更新人设
-- `DELETE /api/personas/{id}` - 删除人设
-- `GET /api/personas/search/` - 搜索人设
-- `GET /api/personas/by-author/{author}` - 按作者获取人设
-- `GET /api/personas/by-tag/{tag}` - 按标签获取人设
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-### 标签管理
-- `GET /api/tags/` - 获取所有标签
-- `GET /api/tags/stats/` - 获取标签统计
+4.  创建 `.env` 文件并设置环境变量。可以参考 `.env.example` (如果提供).
 
-### 作者管理
-- `GET /api/authors/` - 获取所有作者
-- `GET /api/authors/stats/` - 获取作者统计
-- `GET /api/authors/top/` - 获取热门作者
+## 使用
 
-## 测试
-
-使用提供的测试脚本测试API：
+运行开发服务器:
 
 ```bash
-# 确保服务已启动
-python test_api.py
+uvicorn app.main:app --reload
 ```
 
-## 开发
+## API 文档
 
-### 添加新模型
+服务启动后, API 文档可在以下地址访问:
 
-1. 在`app/db/models/`创建模型文件
-2. 在`app/schemas/`创建对应的Pydantic模式
-3. 在`app/crud/`创建CRUD操作类
-4. 在`app/api/endpoints/`创建API端点
-5. 运行数据库迁移：
-   ```bash
-   alembic revision --autogenerate -m "描述"
-   alembic upgrade head
-   ```
+-   **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+-   **ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 
-### 数据库迁移
+## 运行测试
 
 ```bash
-# 创建新的迁移
-alembic revision --autogenerate -m "迁移描述"
-
-# 应用迁移
-alembic upgrade head
-
-# 回滚迁移
-alembic downgrade -1
+pytest
 ```
 
-## 环境变量
+## Linting
 
-| 变量名 | 说明 | 默认值 |
-|--------|------|--------|
-| DATABASE_URL | 数据库连接URL | mysql+pymysql://username:password@localhost:3306/persona_hub |
-| SECRET_KEY | JWT密钥 | 随机生成 |
-| DEBUG | 调试模式 | True |
-| CORS_ORIGINS | CORS源 | ["http://localhost:3000"] |
-| HOST | 服务主机 | 0.0.0.0 |
-| PORT | 服务端口号 | 8000 |
-| LOG_LEVEL | 日志级别 | INFO |
+-   格式化代码:
 
-## MySQL配置
+    ```bash
+    black .
+    isort .
+    ```
 
-### 1. 安装MySQL
-确保系统已安装MySQL服务器，并创建数据库：
+-   类型检查:
 
-```sql
-CREATE DATABASE persona_hub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
+    ```bash
+    mypy .
+    ```
 
-### 2. 创建用户并授权
-```sql
-CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';
-GRANT ALL PRIVILEGES ON persona_hub.* TO 'username'@'localhost';
-FLUSH PRIVILEGES;
-```
+## 数据库迁移
 
-### 3. 配置连接
-在`.env`文件中设置正确的数据库连接：
-```
-DATABASE_URL=mysql+pymysql://your_username:your_password@localhost:3306/persona_hub
-```
+-   创建新的迁移:
 
-## 技术栈
+    ```bash
+    alembic revision --autogenerate -m "Your migration message"
+    ```
 
-- **FastAPI**: 现代、快速的Python Web框架
-- **SQLAlchemy**: Python SQL工具包和ORM
-- **Alembic**: 轻量级数据库迁移工具
-- **Pydantic**: 数据验证和设置管理
-- **SQLite**: 轻量级数据库（默认）
-- **Uvicorn**: ASGI服务器
+-   应用迁移:
 
-## 注意事项
+    ```bash
+    alembic upgrade head
+    ```
 
-- 生产环境请使用PostgreSQL或MySQL
-- 确保SECRET_KEY安全且唯一
-- 定期备份数据库
-- 使用HTTPS部署生产环境
+## 许可证
+
+[MIT](LICENSE)

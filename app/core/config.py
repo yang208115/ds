@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     # GitHub OAuth配置
     GITHUB_CLIENT_ID: str = os.getenv("GITHUB_CLIENT_ID", "")
     GITHUB_CLIENT_SECRET: str = os.getenv("GITHUB_CLIENT_SECRET", "")
-    GITHUB_REDIRECT_URI: str = os.getenv("GITHUB_REDIRECT_URI", "https://api.dshell.top//api/v1/auth/github/callback")
+    GITHUB_REDIRECT_URI: str = os.getenv("GITHUB_REDIRECT_URI", "https://api.dshell.top/api/v1/auth/github/callback")
     
     # 应用配置
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: List[str] = os.getenv('CORS_ORIGINS',[
         "http://localhost:5173",
         "http://localhost:3000",
-        "https://api.dshell.top/"
+        "https://api.dshell.top"
     ])
     
     # 日志配置
