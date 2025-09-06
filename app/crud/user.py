@@ -3,6 +3,7 @@
 主要功能：提供用户相关的CRUD操作
 """
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from app.db.models.user import User, AuthorAvatar
 from app.schemas.user import UserCreate, UserUpdate
@@ -60,6 +61,30 @@ class CRUDUser:
             User | None: 用户对象或None。
         """
         return db.query(User).filter(User.github_id == github_id).first()
+    
+    def get_by_github_id_or_username(self, db: Session, *, github_id: str, username: str) -> User | None:
+        """根据 GitHub ID 或用户名获取用户
+
+        优先匹配 GitHub ID；若 GitHub ID 不存在，再匹配用户名。
+
+        Args:
+            db (Session): 数据库会话。
+            github_id (str): GitHub 用户 ID。
+            username (str): 用户名。
+
+        Returns:
+            User | None: 用户对象或 None。
+        """
+        return (
+            db.query(User)
+            .filter(
+                or_(
+                    User.github_id == github_id,          # 主匹配
+                    User.username == username             # 后备匹配
+                )
+            )
+            .first()
+        )
 
     def get_by_uuid(self, db: Session, uuid: str) -> User | None:
         """根据UUID获取用户

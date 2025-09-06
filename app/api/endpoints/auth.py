@@ -6,7 +6,8 @@
 from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from requests_oauthlib import OAuth2Session
@@ -119,7 +120,8 @@ def github_login():
     """
     github = OAuth2Session(settings.GITHUB_CLIENT_ID, redirect_uri=settings.GITHUB_REDIRECT_URI)
     authorization_url, state = github.authorization_url("https://github.com/login/oauth/authorize")
-    return Response(headers={"Location": authorization_url}, status_code=status.HTTP_302_FOUND)
+    print(authorization_url)
+    return RedirectResponse(url=authorization_url)
 
 
 @router.get("/github/callback", response_model=Token)
@@ -156,9 +158,19 @@ def github_callback(
     github_user_data = github_user_response.json()
     github_id = str(github_user_data["id"])
     github_username = github_user_data["login"]
-    email = github_user_data.get("email", f"{github_username}@github.com") # GitHub可能不返回email
+    email = github_user_data.get("email")
+    if not email:
+        emails_resp = github.get("https://api.github.com/user/emails")
+        if emails_resp.status_code == 200:
+            emails = emails_resp.json()
+            email = next(
+                (e["email"] for e in emails if e["primary"] and e["verified"]),
+                None
+            )
+        if not email:
+            email = f"{github_username}@github.com"  # 兜底占位符
 
-    user = crud_user.get_by_github_id(db, github_id=github_id)
+    user = crud_user.get_by_github_id_or_username(db, github_id=github_id, username=github_username)
     if not user:
         # 如果用户不存在，则创建新用户
         user_in = UserCreate(
@@ -171,7 +183,7 @@ def github_callback(
         user = crud_user.create(db, obj_in=user_in)
     else:
         # 如果用户存在，更新其信息（例如邮箱可能在GitHub上更新了）
-        user_update_data = {"email": email, "github_username": github_username}
+        user_update_data = {"github_username": github_username}
         user = crud_user.update(db, db_obj=user, obj_in=user_update_data)
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)

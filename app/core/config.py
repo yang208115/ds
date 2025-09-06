@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     # 安全配置
     SECRET_KEY: str = os.getenv("SECRET_KEY", "super-secret-key")
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 100))
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 530))
     
     # GitHub OAuth配置
     GITHUB_CLIENT_ID: str = os.getenv("GITHUB_CLIENT_ID", "")
